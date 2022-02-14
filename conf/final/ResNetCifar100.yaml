@@ -1,0 +1,110 @@
+# @package _global_
+id: 1
+hydra:
+  run:
+    dir: ${BASE_DIR}/outputs/ResNetCifar100/
+hoover:
+  save_data: false
+dataset:
+  test_proportion: 0.03333333333
+  n_points: 60000
+  standardize: true
+  name: Cifar100Dataset
+  respect_train_test: true
+  train_limit: 40000
+  with_unseen: true
+experiment:
+  n_runs: 1000
+  random_seed: -1
+  debug: false
+  save_data_until: 10
+  loss: CrossEntropyLoss
+  log_every: 1
+  save_every: 5
+  abort_test_after: 1000
+risk_estimators:
+- TrueRiskEstimator
+- BiasedRiskEstimator
+- FancyUnbiasedRiskEstimator
+- QuadratureRiskEstimator
+- TrueUnseenRiskEstimator
+acquisition_functions:
+- TrueLossAcquisition: null
+- RandomAcquisition: null
+- ClassifierAcquisitionEntropy: null
+- AnySurrogateAcquisitionEntropy: LazySurrEnsemble
+acquisition:
+  sample: true
+  animate: true
+  animate_until: 10
+  lazy_save: true
+  uniform_clip: true
+  uniform_clip_val: 0.2
+  lazy_save_schedule:
+  - 0
+  - 100
+  - 300
+  - 500
+  - 700
+model:
+  keep_constant: true
+  name: WideResNet
+  efficient: true
+  calibrated: true
+  skip_fit_debug: model.pth
+  skip_fit_debug_relative: true
+  save_path: model.pth
+  data_CHW:
+  - 3
+  - 32
+  - 32
+  num_classes: 100
+  debug_mnist: false
+  training_cfg:
+    validation_set_size: 5000
+    stratify_val: true
+    max_epochs: 200
+    learning_rate: 0.1
+    batch_size: 128
+    num_workers: 4
+    pin_memory: true
+    early_stopping_epochs: 200
+    weight_decay: 0.0005
+    optimizer: cifar
+    scheduler: devries
+    transforms: cifar
+    testing_cfg:
+      batch_size: 1000
+acquisition_configs:
+  LazySurrEnsemble:
+    keep_constant: true
+    name: WideResNetEnsemble
+    calibrated: true
+    n_models: 10
+    efficient: true
+    save_path: ensembles/model_{}.pth
+    skip_fit_debug: ensembles/model_{}.pth
+    skip_fit_debug_relative: true
+    data_CHW:
+    - 3
+    - 32
+    - 32
+    num_classes: 100
+    debug_mnist: false
+    lazy: true
+    lazy_schedule: []
+    training_cfg:
+      validation_set_size: 5000
+      stratify_val: true
+      max_epochs: 200
+      learning_rate: 0.1
+      batch_size: 128
+      num_workers: 4
+      pin_memory: true
+      early_stopping_epochs: 200
+      weight_decay: 0.0005
+      optimizer: cifar
+      scheduler: devries
+      transforms: cifar
+    testing_cfg:
+      batch_size: 1000

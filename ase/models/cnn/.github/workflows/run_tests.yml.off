@@ -1,0 +1,25 @@
+name: Run Tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v1
+      with:
+        python-version: '3.7'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install torch==1.4 torchvision tqdm numpy pytest thop==0.0.31-2001170342 ray matplotlib seaborn scikit-learn
+
+    - name: Test with pytest
+      run:
+        pytest

@@ -1,0 +1,29 @@
+name: ase
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.9
+  - pytorch
+  - torchvision
+  - tensorflow
+  - cudatoolkit=10.2
+  - pip
+  - pip:
+    - wandb
+    - scikit-learn
+    - pandas
+    - pycodestyle
+    - hydra-core
+    - omegaconf
+    - jupyterlab
+    - notebook
+    - matplotlib
+    # - seaborn
+    - tqdm
+    - ipywidgets
+    - scipy
+    - Gpy
+    - multimethod
+    - wandb
+    - pathos

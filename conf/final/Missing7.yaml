@@ -1,0 +1,198 @@
+# @package _global_
+id: 0
+
+hydra:
+  run:
+    dir: ${BASE_DIR}/outputs/Missing7/${now:%Y-%m-%d-%H-%M-%S}-${RAND}-${id}/
+
+hoover:
+  save_data: False
+
+experiment:
+  n_runs: 1000
+  loss: CrossEntropyLoss
+  save_every: 1
+  log_every: 1
+  abort_test_after: 5000
+  constant_val_set: False
+
+acquisition:
+  animate: False
+  animate_until: 1
+  lazy_save: True
+  lazy_save_schedule: [0]
+  uniform_clip: False
+
+dataset:
+  # 60k test, 2500 train (500 of those are val)
+  # (use the remaining points to rebalance the filtered test set)
+  name: MNISTDataset
+  n_points: 62500
+  test_proportion: 0.96
+  standardize: True
+  stratify: True
+  respect_train_test: False
+  remove_initial_75_keep_train_size: True
+  filter_nums: [7]
+  filter_nums_relative_frequency: 1 # 0.1
+  with_unseen: True ## still need extra data to rebalance the filtered test set
+  # remove all 7s and 5s from training set
+
+model:
+  name: RadialBNN
+  channels: 16
+  skip_fit_debug: False
+  data_CHW: [1, 28, 28]
+  num_classes: 10
+  joint_predict: False
+  lazy: True   # (this is only relevant for the self-surrogates for which this triggers lazy retraining)
+  efficient: True  # affects main model as well
+  calibrated: True
+  load_calibration: False
+  training_cfg:
+    validation_set_size: 500
+    stratify_val: True
+    max_epochs: 500
+    learning_rate: 1e-4
+    batch_size: 64
+    variational_samples: 8
+    num_workers: 4
+    pin_memory: True
+    early_stopping_epochs: 10
+    padding_epochs: none
+    num_repetitions: 1
+    weight_decay: 1e-4
+    model: radial_bnn
+    channels: 16
+    checkpoints_frequency: 3
+    data_noise_proportion: None
+  testing_cfg:
+    variational_samples: 100
+
+acquisition_functions:
+    - RandomAcquisition: NoSave
+    - ClassifierAcquisitionEntropy: NoSave
+    - SelfSurrogateAcquisitionEntropy: Surr
+    - SelfSurrogateAcquisitionSurrogateEntropy: Surr
+    - SelfSurrogateAcquisitionSurrogateMutualInformation: Surr
+    - SelfSurrogateAcquisitionSurrogateWeightedBALD2: Surr
+    - SelfSurrogateAcquisitionSurrogateEntropy: SurrNoSample
+    - SelfSurrogateAcquisitionSurrogateMutualInformation: SurrNoSample
+    - SelfSurrogateAcquisitionSurrogateWeightedBALD2: SurrNoSample
+
+
+risk_estimators:
+    - TrueRiskEstimator
+    - BiasedRiskEstimator
+    - FancyUnbiasedRiskEstimator
+    - FullSurrogateASMC
+
+acquisition_configs:
+  NoSave:
+    acquisition:
+      animate: False
+  Surr:
+    name: RadialBNN
+    joint_predict: True
+    channels: 16
+    skip_fit_debug: False
+    save_path: single_aux/model.pth
+    data_CHW: [1, 28, 28]
+    num_classes: 10
+    lazy: True   # (this is only relevant for the self-surrogates for which this triggers lazy retraining)
+    lazy_schedule: [0, 5, 10, 20, 30, 40, 50, 70, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1250, 1500, 1750, 2000, 2500, 3000, 3500, 4000, 4500, 4900]
+    efficient: True  # affects main model as well
+    calibrated: True
+    load_calibration: False
+    temp_save_path: 'single_aux/temperature.json'
+    val_idxs: False
+    training_cfg:
+      validation_set_size: 500
+      stratify_val: True
+      max_epochs: 500
+      learning_rate: 1e-4
+      batch_size: 64
+      variational_samples: 8
+      num_workers: 4
+      pin_memory: True
+      persistent_workers: True
+      early_stopping_epochs: 10
+      padding_epochs: none
+      num_repetitions: 1
+      weight_decay: 1e-4
+      model: radial_bnn
+      channels: 16
+      checkpoints_frequency: 3
+      data_noise_proportion: None
+    testing_cfg:
+      variational_samples: 100
+  SurrNoSample:
+    acquisition:
+      sample: False
+    name: RadialBNN
+    joint_predict: True
+    channels: 16
+    skip_fit_debug: False
+    save_path: single_aux/model.pth
+    data_CHW: [1, 28, 28]
+    num_classes: 10
+    lazy: True   # (this is only relevant for the self-surrogates for which this triggers lazy retraining)
+    lazy_schedule: [0, 5, 10, 20, 30, 40, 50, 70, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1250, 1500, 1750, 2000, 2500, 3000, 3500, 4000, 4500, 4900]
+    efficient: True  # affects main model as well
+    calibrated: True
+    load_calibration: False
+    temp_save_path: 'single_aux/temperature.json'
+    val_idxs: False
+    training_cfg:
+      validation_set_size: 500
+      stratify_val: True
+      max_epochs: 500
+      learning_rate: 1e-4
+      batch_size: 64
+      variational_samples: 8
+      num_workers: 4
+      pin_memory: True
+      persistent_workers: True
+      early_stopping_epochs: 10
+      padding_epochs: none
+      num_repetitions: 1
+      weight_decay: 1e-4
+      model: radial_bnn
+      channels: 16
+      checkpoints_frequency: 3
+      data_noise_proportion: None
+    testing_cfg:
+      variational_samples: 100
+  LazySurr:
+    name: RadialBNN
+    channels: 16
+    skip_fit_debug: False
+    save_path: single_aux_lazy/model.pth
+    data_CHW: [1, 28, 28]
+    lazy: True   # (this is only relevant for the self-surrogates for which this triggers lazy retraining)
+    lazy_schedule: []
+    efficient: True  # affects main model as well
+    calibrated: True
+    load_calibration: False
+    temp_save_path: 'single_aux_lazy/temperature.json'
+    val_idxs: False
+    training_cfg:
+      validation_set_size: 500
+      stratify_val: True
+      max_epochs: 500
+      learning_rate: 1e-4
+      batch_size: 64
+      variational_samples: 8
+      num_workers: 4
+      pin_memory: True
+      persistent_workers: True
+      early_stopping_epochs: 10
+      padding_epochs: none
+      num_repetitions: 1
+      weight_decay: 1e-4
+      model: radial_bnn
+      channels: 16
+      checkpoints_frequency: 3
+      data_noise_proportion: None
+    testing_cfg:
+      variational_samples: 100

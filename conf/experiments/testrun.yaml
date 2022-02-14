@@ -1,0 +1,31 @@
+# @package _global_
+hydra:
+  run:
+    dir: ${BASE_DIR:}/outputs/scratch
+
+model:
+  calibrated: False
+  training_cfg:
+    max_epochs: 1
+
+acquisition_configs:
+  Surr:
+    calibrated: False
+    training_cfg:
+      max_epochs: 1
+  SurrNoSample:
+    calibrated: False
+    training_cfg:
+      max_epochs: 1
+  LazySurr:
+    calibrated: False
+    training_cfg:
+      max_epochs: 1
+  LazySurrEnsembleLarge:
+    calibrated: False
+    training_cfg:
+      max_epochs: 1
+  LazySurrEnsemble:
+    calibrated: False
+    training_cfg:
+      max_epochs: 1
